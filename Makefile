@@ -3,11 +3,11 @@ all: libht1632c.so test
 clean:
 	rm -rf *.o *.a *.so
 
-libht1632c.so:	ht1632c.o fonts.o /usr/lib/libwiringPi.so
+libht1632c.so:	ht1632c.o fonts.o rotenc.o /usr/lib/libwiringPi.so
 	gcc -std=c99 -shared -o $@ $^
 	strip $@
 
-libht1632c.a:	ht1632c.o fonts.o
+libht1632c.a:	ht1632c.o fonts.o rotenc.o
 	ar rcs $@ $^
 
 test:	test.o libht1632c.a /usr/lib/libwiringPi.so

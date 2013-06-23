@@ -1,12 +1,34 @@
-#include "ht1632c.h"
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
-int main(void) {
-	printf("init\n");
+// #include "wiringPi.h"
+
+#include "ht1632c.h"
+#include "rotenc.h"
+
+void rotenc(int value)
+{
+	printf("rotenc: %d\n", value);
+}
+
+int main(void)
+{
+// 	if (wiringPiSetup() == -1) {
+// 		printf( "WiringPi Setup Failed: %s\n", strerror(errno));
+// 		return 1;
+// 	}
+// #define PIN0 3
+// #define PIN1 4
+	
+	printf("init rotenc\n");
+	rotenc_init(3, 4, &rotenc);
+	
+	printf("init ht1632c\n");
 	ht1632c_init();
 	
-	printf("set pwm\n");
+// 	printf("set pwm\n");
 	ht1632c_pwm(8);
 
 // 	for (int i = 0; i < 2400; ++i) {
@@ -21,6 +43,8 @@ int main(void) {
 // 	}
 	ht1632c_putchar(0, 0, '0', &font_6x8, 1);
 	ht1632c_sendframe();
+	
+	while (1) usleep(1000000);
 	
 // 	int i = 0;
 // 	while (1) {
