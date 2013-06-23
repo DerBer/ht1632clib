@@ -250,6 +250,18 @@ void ht1632c_line(const int x0, const int y0, const int x1, const int y1, const 
 	}
 }
 
+void ht1632c_box(int x0, int y0, int x1, int y1, const uint8_t color)
+{
+	int tmp;
+	if (x1 < x0) { tmp = x0; x0 = x1; x1 = tmp; };
+	if (y1 < y0) { tmp = y0; y0 = y1; y1 = tmp; };
+	for (int y = y0; y <= y1; ++y) {
+		for (int x = x0; x <= x1; ++x) {
+			ht1632c_plot(x, y, color);
+		}
+	}
+}
+
 int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font, const uint8_t color)
 {
 	const int width = font->width;
@@ -272,4 +284,11 @@ int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font
 	}
 	
 	return x + width;
+}
+
+int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color)
+{
+	for (int p = x; *s; ++s) {
+		p = ht1632c_putchar(p, y, *s, font, color);
+	}
 }

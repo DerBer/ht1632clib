@@ -29,7 +29,11 @@ void ht1632c_plot(const int x, const int y, const uint8_t color);
 ///
 void ht1632c_line(const int x0, const int y0, const int x1, const int y1, const uint8_t color);
 ///
+void ht1632c_box(const int x0, const int y0, const int x1, const int y1, const uint8_t color);
+///
 int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font, const uint8_t color);
+///
+int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color);
 
 // void _setbit(int p); // F-IXME
 
