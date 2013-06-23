@@ -1,0 +1,5 @@
+*.o
+*.pyc
+/libht1632c.a
+/libht1632c.so
+/test
