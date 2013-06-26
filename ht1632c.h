@@ -34,14 +34,14 @@ void ht1632c_sendframe();
 void ht1632c_clear();
 
 /// Puts a single pixel in the coordinates x, y.
-/// Restricts modification to the clipping area. Negative values translate to min/max values.
+void ht1632c_plot(const int x, const int y, const uint8_t color);
+
+/// Restricts modification to the clipping area (x1/y1-exclusive).
+/// Negative values translate to min/max values.
 void ht1632c_clip(const int x0, const int y0, const int x1, const int y1);
 
 /// Reset clipping.
 #define ht1632c_clip_reset() ht1632c_clip(-1, -1, -1, -1)
-
-/// Plots a single pixel.
-void ht1632c_plot(const int x, const int y, const uint8_t color);
 
 /// Draws a line from (x0, y0) to (x1, y1).
 void ht1632c_line(const int x0, const int y0, const int x1, const int y1, const uint8_t color);
