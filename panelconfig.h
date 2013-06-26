@@ -4,7 +4,7 @@
 // #define PANEL_24x16  /* preset for monochrome 24x16 panel */
 
 #define NUM_PANELS 2 /* number of panels */
-#define VERTICAL     /* 90° rotation (vertical display) */
+// #define VERTICAL     /* 90° rotation (vertical display) */
 
 // Chained chip select mode.
 // Define if chip select pins are connected directly to output pins.

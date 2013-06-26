@@ -36,6 +36,9 @@ void ht1632c_clear();
 /// Puts a single pixel in the coordinates x, y.
 void ht1632c_plot(const int x, const int y, const uint8_t color);
 
+/// Gets pixel value at the coordinates x, y.
+uint8_t ht1632c_peek(const int x, const int y);
+
 /// Restricts modification to the clipping area (x1/y1-exclusive).
 /// Negative values translate to min/max values.
 void ht1632c_clip(const int x0, const int y0, const int x1, const int y1);
@@ -54,5 +57,8 @@ int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font
 
 /// Prints a string.
 int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color);
+
+///
+void ht1632c_game(int x0, int y0, int x1, int y1, const uint8_t color);
 
 #endif

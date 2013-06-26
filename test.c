@@ -41,16 +41,26 @@ int main(void)
 // 		ht1632c_sendframe();
 // 		usleep(100000);
 // 	}
-	int i = 0;
-	while (1) {
-		i = (i + 1) % 64;
-		ht1632c_clear();
-// 		ht1632c_clip(1, 1, 60, 7);
-		ht1632c_putstr(32-i, 0, "0123456789", &font_7x8, 3);
-		ht1632c_sendframe();
-		usleep(50000);
-	}
+// 	int i = 0;
+// 	while (1) {
+// 		i = (i + 1) % 64;
+// 		ht1632c_clear();
+// // 		ht1632c_clip(1, 1, 60, 7);
+// 		ht1632c_putstr(32-i, 0, "0123456789", &font_7x8, 3);
+// 		ht1632c_sendframe();
+// 		usleep(50000);
+// 	}
+
+	ht1632c_putstr(0, 0, "0123", &font_7x8, 1);
+	ht1632c_sendframe();
 	
+	usleep(1000000);
+	while (1) {
+		ht1632c_game(0, 0, 63, 15, 1);
+		ht1632c_sendframe();
+		usleep(10000);
+	}
+
 // 	ht1632c_box(0, 0, 63, 15, 3);
 // 	ht1632c_sendframe();
 // 	while (1) usleep(1000000);

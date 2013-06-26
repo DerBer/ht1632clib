@@ -53,6 +53,8 @@
 #define CHIP_SIZE ((COLOR_SIZE * COLORS) + 2)     /* effective size of frame buffer per chip */
 #define PANEL_HEADER_BITS (HT1632_ID_LEN + HT1632_ADDR_LEN)
 
+#define toBit(v) ((v) ? 1 : 0)
+
 /// frame buffer
 uint8_t framebuffer[NUM_CHIPS][CHIP_SIZE];
 int spifd = -1;
@@ -129,6 +131,12 @@ void ht1632c_update_framebuffer(const int panel, const int addr, const uint8_t t
 		*v |= pixel_bitval;
 	else
 		*v &= ~pixel_bitval;
+}
+
+uint8_t ht1632c_get_framebuffer(const int panel, const int addr, const uint8_t target_bitval) 
+{
+	uint8_t* const v = framebuffer[panel] + addr;
+	return *v & target_bitval;
 }
 
 //
@@ -245,6 +253,42 @@ void ht1632c_plot(const int yr, const int x, const uint8_t color)
 	}
 }
 
+#ifndef VERTICAL
+uint8_t ht1632c_peek(const int x, const int y)
+{
+	if (x < clipX0 || x >= clipX1 || y < clipY0 || y >= clipY1)
+		return 0;
+#else
+uint8_t ht1632c_peek(const int yr, const int x)
+{
+	const int y = (WIDTH - 1) - yr;
+	if (x < clipY0 || x >= clipY1 || y < clipX0 || y >= clipX1)
+		return 0;
+#endif
+	const int xc = x / CHIP_WIDTH;
+	const int yc = y / CHIP_HEIGHT;
+	const int chip = xc + (xc & 0xfffe) + (yc * 2);
+	
+	const int xb = (x % CHIP_WIDTH) * (CHIP_HEIGHT / 8);
+	const int yb = (y % CHIP_HEIGHT) + PANEL_HEADER_BITS;
+	int addr = xb + (yb / 8);
+	const uint8_t bitval = 128 >> (yb & 7);
+// 	printf("chip: %d, addr: %d, bit: %d\n", chip, addr, bitval);
+
+	uint8_t c;
+	// first color
+	if (addr > 1 || bitval <= 2)
+		c = ht1632c_get_framebuffer(chip, addr, bitval) ? 1 : 0;
+	else // special case: first bits must are 'wrapped' to the end
+		c = ht1632c_get_framebuffer(chip, addr + CHIP_SIZE - 2, bitval) ? 1 : 0;
+	// other colors
+	for (int i = 1; i < COLORS; ++i) {
+		addr += COLOR_SIZE;
+		c |= ht1632c_get_framebuffer(chip, addr, bitval) ? (1 << i) : 0; 
+	}
+	return c;
+}
+
 void ht1632c_line(const int x0, const int y0, const int x1, const int y1, const uint8_t color)
 {
 	const int dx =  abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -263,9 +307,13 @@ void ht1632c_line(const int x0, const int y0, const int x1, const int y1, const 
 
 void ht1632c_box(int x0, int y0, int x1, int y1, const uint8_t color)
 {
-	int tmp;
-	if (x1 < x0) { tmp = x0; x0 = x1; x1 = tmp; };
-	if (y1 < y0) { tmp = y0; y0 = y1; y1 = tmp; };
+	// fix corner order
+	{
+		int tmp;
+		if (x1 < x0) { tmp = x0; x0 = x1; x1 = tmp; };
+		if (y1 < y0) { tmp = y0; y0 = y1; y1 = tmp; };
+	}
+	
 	for (int y = y0; y <= y1; ++y) {
 		for (int x = x0; x <= x1; ++x) {
 			ht1632c_plot(x, y, color);
@@ -304,4 +352,33 @@ int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font
 		p = ht1632c_putchar(p, y, *s, font, color);
 	}
 	return p;
+}
+
+void ht1632c_game(int x0, int y0, int x1, int y1, const uint8_t color)
+{
+	// fix corner order
+	{
+		int tmp;
+		if (x1 < x0) { tmp = x0; x0 = x1; x1 = tmp; };
+		if (y1 < y0) { tmp = y0; y0 = y1; y1 = tmp; };
+	}
+	
+	// TODO use 2nd buffer for new frame
+	for (int y = y0; y <= y1; ++y) {
+		for (int x = x0; x <= x1; ++x) {
+			int n = toBit(ht1632c_peek(x - 1, y - 1) & color)
+				+ toBit(ht1632c_peek(x, y - 1) & color)
+				+ toBit(ht1632c_peek(x + 1, y - 1) & color)
+				+ toBit(ht1632c_peek(x - 1, y) & color)
+				+ toBit(ht1632c_peek(x + 1, y) & color)
+				+ toBit(ht1632c_peek(x - 1, y + 1) & color)
+				+ toBit(ht1632c_peek(x, y + 1) & color)
+				+ toBit(ht1632c_peek(x + 1, y + 1) & color);
+			int m = toBit(ht1632c_peek(x, y) & color);
+			if (n == 3)
+				ht1632c_plot(x, y, color);
+			else if (m)
+				ht1632c_plot(x, y, (n == 2) ? color : 0);
+		}
+	}
 }
