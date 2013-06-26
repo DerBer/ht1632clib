@@ -56,9 +56,7 @@
 /// frame buffer
 uint8_t framebuffer[NUM_CHIPS][CHIP_SIZE];
 int spifd = -1;
-
-// /// include font data
-// #include "fonts.c"
+int clipX0, clipY0, clipX1, clipY1;
 
 //
 // internal functions
@@ -107,7 +105,6 @@ void ht1632c_chipselect(const int cs)
 #else
 	for (int i = 0; i < NUM_CHIPS; ++i)
 		digitalWrite(HT1632_CS + i, ((cs == (i + 1)) || (cs == HT1632_CS_ALL)) ? 0 : 1);
-// 	usleep(10);
 #endif
 }
 
@@ -120,7 +117,6 @@ void ht1632c_sendcmd(const int chip, const uint8_t cmd) {
 	reverse_endian(&data, sizeof(data));
 
 	ht1632c_chipselect(chip);
-// 	wiringPiSPIDataRW(0, (uint8_t*)&data, 2);
 	write(spifd, &data, 2);
 
 	ht1632c_chipselect(HT1632_CS_NONE);
@@ -176,6 +172,11 @@ int ht1632c_init()
 	return 0;
 }
 
+int ht1632c_close()
+{
+	close(spifd);
+}
+
 void ht1632c_pwm(const uint8_t value)
 {
 	ht1632c_sendcmd(HT1632_CS_ALL, HT1632_CMD_PWM | (value & 0x0f));
@@ -183,8 +184,6 @@ void ht1632c_pwm(const uint8_t value)
 
 void ht1632c_sendframe()
 {
-// 	printf("ht1632c_sendframe\n");
-// 	usleep(1000000);
 	for (int chip = 0; chip < NUM_CHIPS; ++chip) {
 		ht1632c_chipselect(chip + 1);
 		write(spifd, framebuffer[chip], CHIP_SIZE);
@@ -200,16 +199,15 @@ void ht1632c_clear()
 	for (int i = 0; i < NUM_CHIPS; ++i) {
 		framebuffer[i][0] = HT1632_ID_WR << (8 - HT1632_ID_LEN);
 	}
+	// reset clipping
+	ht1632c_clip_reset();
 }
-
-// void _setbit(int p)
-// {
-// 	ht1632c_update_framebuffer(0, p / 8, 1, 128 >> (p & 7));
-// }
 
 void ht1632c_plot(const int x, const int y, const uint8_t color)
 {
-	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+// 	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+// 		return;
+	if (x < clipX0 || x >= clipX1 || y < clipY0 || y >= clipY1)
 		return;
 
 	const int xc = x / CHIP_WIDTH;
@@ -293,4 +291,12 @@ int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font
 		p = ht1632c_putchar(p, y, *s, font, color);
 	}
 	return p;
+}
+
+void ht1632c_clip(const int x0, const int y0, const int x1, const int y1)
+{
+	clipX0 = (x0 >= 0) ? x0 : 0;
+	clipY0 = (y0 >= 0) ? y0 : 0;
+	clipX1 = (x1 >= 0) ? x1 : WIDTH;
+	clipY1 = (y1 >= 0) ? y1 : HEIGHT;
 }

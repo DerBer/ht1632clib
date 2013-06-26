@@ -45,12 +45,16 @@ int main(void)
 	while (1) {
 		i = (i + 1) % 128;
 		ht1632c_clear();
-		ht1632c_putstr(63-i, 0, "0123456789", &font_7x8, 1);
+		ht1632c_clip(0, 0, 30, 6);
+		ht1632c_putstr(63-i, 0, "0123456789", &font_7x8, 3);
 		ht1632c_sendframe();
 		usleep(50000);
 	}
 	
-	while (1) usleep(1000000);
+// 	ht1632c_box(0, 0, 63, 15, 3);
+// 	ht1632c_sendframe();
+// 	while (1) usleep(1000000);
+// 	ht1632c_close();
 	
 // 	int i = 0;
 // 	while (1) {
