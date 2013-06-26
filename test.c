@@ -8,10 +8,10 @@
 #include "ht1632c.h"
 #include "rotenc.h"
 
-void rotenc(int value)
-{
-	printf("rotenc: %d\n", value);
-}
+// void rotenc(int value)
+// {
+// 	printf("rotenc: %d\n", value);
+// }
 
 int main(void)
 {
@@ -22,8 +22,8 @@ int main(void)
 // #define PIN0 3
 // #define PIN1 4
 	
-	printf("init rotenc\n");
-	rotenc_init(3, 4, &rotenc);
+// 	printf("init rotenc\n");
+// 	rotenc_init(3, 4, &rotenc);
 	
 	printf("init ht1632c\n");
 	ht1632c_init();
@@ -43,10 +43,10 @@ int main(void)
 // 	}
 	int i = 0;
 	while (1) {
-		i = (i + 1) % 128;
+		i = (i + 1) % 64;
 		ht1632c_clear();
-		ht1632c_clip(0, 0, 30, 6);
-		ht1632c_putstr(63-i, 0, "0123456789", &font_7x8, 3);
+// 		ht1632c_clip(1, 1, 60, 7);
+		ht1632c_putstr(32-i, 0, "0123456789", &font_7x8, 3);
 		ht1632c_sendframe();
 		usleep(50000);
 	}

@@ -74,7 +74,7 @@ void *reverse_endian(void *p, size_t size) {
   return p;
 }
 
-#ifdef HT1632_CS_CHAINED
+#ifdef HT1632C_CS_CHAINED
 void ht1632c_clk_pulse(int num)
 {
 	while(num--)
@@ -89,7 +89,7 @@ void ht1632c_clk_pulse(int num)
 
 void ht1632c_chipselect(const int cs)
 {
-#ifdef HT1632_CS_CHAINED
+#ifdef HT1632C_CS_CHAINED
 	if (cs == HT1632_CS_ALL) {
 		digitalWrite(HT1632_CS, 0);
 		ht1632c_clk_pulse(NUM_CHIPS);
@@ -148,7 +148,7 @@ int ht1632c_init()
 	}
 	
 	// configure CS pins
-#ifdef HT1632_CS_CHAINED
+#ifdef HT1632C_CS_CHAINED
 	pinMode(HT1632_CLK, OUTPUT);
 	pinMode(HT1632_CS, OUTPUT);
 #else
@@ -203,13 +203,18 @@ void ht1632c_clear()
 	ht1632c_clip_reset();
 }
 
+#ifndef VERTICAL
 void ht1632c_plot(const int x, const int y, const uint8_t color)
 {
-// 	if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
-// 		return;
 	if (x < clipX0 || x >= clipX1 || y < clipY0 || y >= clipY1)
 		return;
-
+#else
+void ht1632c_plot(const int yr, const int x, const uint8_t color)
+{
+	const int y = (WIDTH - 1) - yr;
+	if (x < clipY0 || x >= clipY1 || y < clipX0 || y >= clipX1)
+		return;
+#endif
 	const int xc = x / CHIP_WIDTH;
 	const int yc = y / CHIP_HEIGHT;
 	const int chip = xc + (xc & 0xfffe) + (yc * 2);
