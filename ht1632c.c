@@ -288,7 +288,9 @@ int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font
 
 int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color)
 {
-	for (int p = x; *s; ++s) {
+	int p;
+	for (p = x; *s; ++s) {
 		p = ht1632c_putchar(p, y, *s, font, color);
 	}
+	return p;
 }

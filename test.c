@@ -29,7 +29,7 @@ int main(void)
 	ht1632c_init();
 	
 // 	printf("set pwm\n");
-	ht1632c_pwm(8);
+	ht1632c_pwm(7);
 
 // 	for (int i = 0; i < 2400; ++i) {
 // 		printf("%d\n", i);
@@ -41,8 +41,14 @@ int main(void)
 // 		ht1632c_sendframe();
 // 		usleep(100000);
 // 	}
-	ht1632c_putchar(0, 0, '0', &font_6x8, 1);
-	ht1632c_sendframe();
+	int i = 0;
+	while (1) {
+		i = (i + 1) % 128;
+		ht1632c_clear();
+		ht1632c_putstr(63-i, 0, "0123456789", &font_7x8, 1);
+		ht1632c_sendframe();
+		usleep(50000);
+	}
 	
 	while (1) usleep(1000000);
 	

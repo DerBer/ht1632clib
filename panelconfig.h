@@ -1,7 +1,7 @@
 // ht1632c panel configuration
 
-// #define PANEL_32x16C /* preset for bi-color 32x16 panel */
-#define PANEL_24x16  /* preset for monochrome 24x16 panel */
+#define PANEL_32x16C /* preset for bi-color 32x16 panel */
+// #define PANEL_24x16  /* preset for monochrome 24x16 panel */
 
 // Chained chip select mode.
 // Define if chip select pins are connected directly to output pins.

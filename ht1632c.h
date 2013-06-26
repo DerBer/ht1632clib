@@ -18,7 +18,9 @@
 // public functions
 //
 
+///
 int ht1632c_init();
+///
 void ht1632c_pwm(const uint8_t value);
 /// sends frame buffer to display; required to bring any drawing operations to the display
 void ht1632c_sendframe();

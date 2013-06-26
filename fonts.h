@@ -9,5 +9,9 @@ typedef struct
 	const uint16_t* data;
 } FontInfo;
 
+extern const FontInfo font_7x8;
+
+extern const FontInfo font_4x6;
 extern const FontInfo font_6x8;
-// extern const FontInfo font_3x5;
+extern const FontInfo font_7x12;
+extern const FontInfo font_8x12;
