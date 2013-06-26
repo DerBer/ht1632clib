@@ -203,6 +203,14 @@ void ht1632c_clear()
 	ht1632c_clip_reset();
 }
 
+void ht1632c_clip(const int x0, const int y0, const int x1, const int y1)
+{
+	clipX0 = (x0 >= 0) ? x0 : 0;
+	clipY0 = (y0 >= 0) ? y0 : 0;
+	clipX1 = (x1 >= 0) ? x1 : WIDTH;
+	clipY1 = (y1 >= 0) ? y1 : HEIGHT;
+}
+
 #ifndef VERTICAL
 void ht1632c_plot(const int x, const int y, const uint8_t color)
 {
@@ -296,12 +304,4 @@ int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font
 		p = ht1632c_putchar(p, y, *s, font, color);
 	}
 	return p;
-}
-
-void ht1632c_clip(const int x0, const int y0, const int x1, const int y1)
-{
-	clipX0 = (x0 >= 0) ? x0 : 0;
-	clipY0 = (y0 >= 0) ? y0 : 0;
-	clipX1 = (x1 >= 0) ? x1 : WIDTH;
-	clipY1 = (y1 >= 0) ? y1 : HEIGHT;
 }
