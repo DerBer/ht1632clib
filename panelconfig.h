@@ -18,8 +18,8 @@
 
 // chip select pins
 #ifdef HT1632C_CS_CHAINED
-	#define HT1632_CLK  0           /* chip select clock pin */
-	#define HT1632_CS   1           /* chip select data pin */
+	#define HT1632_CLK  10          /* chip select clock pin */
+	#define HT1632_CS   11          /* chip select data pin */
 #else
 	#define HT1632_CS   0           /* first chip select pin; */
 	                                /* successive pin numbers are used for additional chips */

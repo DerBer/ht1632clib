@@ -1,3 +1,4 @@
+import os
 from ctypes import *
 lib = cdll.LoadLibrary('../libht1632c.so')
 
@@ -18,9 +19,16 @@ lib.ht1632c_putstr.restype = c_int
 
 class HT1632C(object):
 	def __init__(self):
+		print("Loading GPIO SPI module")
+		os.system("gpio load spi")
+		print("Initializing HT1632C")
 		if lib.ht1632c_init() != 0:
 			raise IOError("Could not init display")
+		self.font4x6 = lib.font_4x6
 		self.font6x8 = lib.font_6x8
+		self.font7x8 = lib.font_7x8
+		self.font7x12 = lib.font_7x12
+		self.font8x12 = lib.font_8x12
 	
 	def pwm(self, value):
 		lib.ht1632c_pwm(value)

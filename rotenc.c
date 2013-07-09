@@ -5,9 +5,11 @@
 #include <errno.h>
 #include <wiringPi.h>
 
-int rotenc_pin0 = 0;
-int rotenc_pin1 = 0;
-rotenc_callback_t rotenc_callback = 0;
+static int rotenc_pin_enc0 = 0;
+static int rotenc_pin_enc1 = 0;
+static int rotenc_pin_btn = 0;
+static rotenc_callback_t rotenc_callback = 0;
+static int rotenc_value = 0;
 
 void rotenc_decode(int code)
 {
@@ -20,31 +22,57 @@ void rotenc_decode(int code)
 			state = -1;
 	} else if (state > 0) {
 		if ((code == state) && (++state >= 4)) {
-			rotenc_callback(1);
+// 			rotenc_callback(1);
+			rotenc_value = 1;
+			piUnlock(0);
+// 			printf("rotenc unlock\n");
 			state = 0;
+// 			piLock(0);
 		}
 	} else { // (state < 0)
 		if (((code ^ 2) == -state) && (--state <= 4)) {
-			rotenc_callback(-1);
+// 			rotenc_callback(-1);
+			rotenc_value = -1;
+			piUnlock(0);
 			state = 0;
+// 			piLock(0);
 		}
 	}
 // 	printf("state: %d\n", state);
 }
 
-void rotenc_isr0()
+void rotenc_isr_enc0()
 {
-	rotenc_decode(digitalRead(rotenc_pin0) << 1);
-}
-void rotenc_isr1()
-{
-	rotenc_decode((digitalRead(rotenc_pin1) << 1) | 1);
+	rotenc_decode(digitalRead(rotenc_pin_enc0) << 1);
 }
 
-int rotenc_init(int pin0, int pin1, rotenc_callback_t callback)
+void rotenc_isr_enc1()
 {
-	rotenc_pin0 = pin0;
-	rotenc_pin1 = pin1;
+	rotenc_decode((digitalRead(rotenc_pin_enc1) << 1) | 1);
+}
+
+void rotenc_isr_btn()
+{
+	rotenc_value = 0;
+	piUnlock(0);
+}
+
+PI_THREAD(cbThread)
+{
+	piHiPri(10);
+	for (;;) {
+// 		printf("rotenc thread\n");
+		piLock(0);
+		rotenc_callback(rotenc_value);
+// 		piUnlock(0);
+	}
+}
+
+int rotenc_init(int pinEnc0, int pinEnc1, int pinBtn, rotenc_callback_t callback)
+{
+	rotenc_pin_enc0 = pinEnc0;
+	rotenc_pin_enc1 = pinEnc1;
+	rotenc_pin_btn = pinBtn;
 	rotenc_callback = callback;
 	
 	// init WiringPi
@@ -54,12 +82,22 @@ int rotenc_init(int pin0, int pin1, rotenc_callback_t callback)
 	}
 
 	// configure pins
-	pinMode(pin0, INPUT);
-	pinMode(pin1, INPUT);
-	pullUpDnControl(pin0, PUD_UP);
-	pullUpDnControl(pin1, PUD_UP);
-	wiringPiISR(pin0, INT_EDGE_BOTH, &rotenc_isr0);
-	wiringPiISR(pin1, INT_EDGE_BOTH, &rotenc_isr1);
-
+	pinMode(pinEnc0, INPUT);
+	pinMode(pinEnc1, INPUT);
+	pinMode(pinBtn, INPUT);
+	pullUpDnControl(pinEnc0, PUD_UP);
+	pullUpDnControl(pinEnc1, PUD_UP);
+	pullUpDnControl(pinBtn, PUD_UP);
+	wiringPiISR(pinEnc0, INT_EDGE_BOTH, &rotenc_isr_enc0);
+	wiringPiISR(pinEnc1, INT_EDGE_BOTH, &rotenc_isr_enc1);
+	wiringPiISR(pinBtn, INT_EDGE_RISING, &rotenc_isr_btn);
+	
+	// start handler thread
+	piLock(0);
+	if (piThreadCreate(cbThread) != 0) {
+		printf( "Could not create rotary encoder handler thread\n");
+		return 1;
+	}
+	
 	return 0;
 }

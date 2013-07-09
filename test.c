@@ -8,10 +8,10 @@
 #include "ht1632c.h"
 #include "rotenc.h"
 
-// void rotenc(int value)
-// {
-// 	printf("rotenc: %d\n", value);
-// }
+void rotenc(int value)
+{
+	printf("rotenc: %d\n", value);
+}
 
 int main(void)
 {
@@ -22,8 +22,8 @@ int main(void)
 // #define PIN0 3
 // #define PIN1 4
 	
-// 	printf("init rotenc\n");
-// 	rotenc_init(3, 4, &rotenc);
+	printf("init rotenc\n");
+	rotenc_init(3, 4, 2, &rotenc);
 	
 	printf("init ht1632c\n");
 	ht1632c_init();
