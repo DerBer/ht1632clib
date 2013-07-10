@@ -1,6 +1,9 @@
 import os
+import inspect
 from ctypes import *
-lib = cdll.LoadLibrary('../libht1632c.so')
+
+libPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + "/../libht1632c.so")
+lib = cdll.LoadLibrary(libPath)
 
 lib.ht1632c_init.argtypes = []
 lib.ht1632c_init.restype = c_int

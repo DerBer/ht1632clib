@@ -1,7 +1,7 @@
 from ctypes import *
-lib = cdll.LoadLibrary('../libht1632c.so')
+import ht1632c
 
-from threading import *
+lib = ht1632c.lib
 
 CBFUNC = CFUNCTYPE(None, c_int)
 lib.rotenc_init.argtypes = [c_int, c_int, c_int, CBFUNC]
