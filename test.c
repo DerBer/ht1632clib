@@ -15,18 +15,15 @@ void rotenc(int value)
 
 int main(void)
 {
-// 	if (wiringPiSetup() == -1) {
-// 		printf( "WiringPi Setup Failed: %s\n", strerror(errno));
-// 		return 1;
-// 	}
-// #define PIN0 3
-// #define PIN1 4
+#define ROTENC_PIN_0 3
+#define ROTENC_PIN_1 4
+#define ROTENC_PIN_BTN 2
 	
 	printf("init rotenc\n");
-	rotenc_init(3, 4, 2, &rotenc);
+	rotenc_init(ROTENC_PIN_0, ROTENC_PIN_1, ROTENC_PIN_BTN, &rotenc);
 	
 	printf("init ht1632c\n");
-	ht1632c_init();
+	ht1632c_init(0);
 	
 // 	printf("set pwm\n");
 	ht1632c_pwm(7);
@@ -56,7 +53,7 @@ int main(void)
 	
 	usleep(1000000);
 	while (1) {
-		ht1632c_game(0, 0, 63, 15, 1);
+		ht1632c_game(0, 0, ht1632c_width() - 1, ht1632c_height() - 1, 1);
 		ht1632c_sendframe();
 		usleep(10000);
 	}
@@ -88,7 +85,7 @@ int main(void)
 // 		ht1632c_sendframe();
 // 		
 // 		i++;
-// 		usleep(100000);
+// 		usleep(50000);
 // 	}
 	
 // 	printf("done.\n");

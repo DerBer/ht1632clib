@@ -28,26 +28,26 @@
 // panel parameters
 #ifdef PANEL_32x16C
 	#define CHIPS_PER_PANEL 4       /* ht1632c chips per panel */
-#ifndef VERTICAL
+// #ifndef VERTICAL
 	#define WIDTH (32 * NUM_PANELS) /* display width (pixels) */
 	#define HEIGHT 16               /* display height (pixels) */
-#else
-	#define WIDTH 16                /* display width (pixels) */
-	#define HEIGHT (32 * NUM_PANELS)/* display height (pixels) */
-#endif
+// #else
+// 	#define WIDTH 16                /* display width (pixels) */
+// 	#define HEIGHT (32 * NUM_PANELS)/* display height (pixels) */
+// #endif
 	#define CHIP_WIDTH 16           /* chip width (pixels) */
 	#define CHIP_HEIGHT 8           /* chip height (pixels) */
 	#define COLORS 2                /* number of colors (1 or 2) */
 #endif
 #ifdef PANEL_24x16
 	#define CHIPS_PER_PANEL 1       /* ht1632c chips per panel */
-#ifndef VERTICAL
+// #ifndef VERTICAL
 	#define WIDTH (24 * NUM_PANELS) /* display width (pixels) */
 	#define HEIGHT 16               /* display height (pixels) */
-#else
-	#define WIDTH 16                /* display width (pixels) */
-	#define HEIGHT (32 * NUM_PANELS)/* display height (pixels) */
-#endif
+// #else
+// 	#define WIDTH 16                /* display width (pixels) */
+// 	#define HEIGHT (32 * NUM_PANELS)/* display height (pixels) */
+// #endif
 	#define CHIP_WIDTH 24           /* chip width (pixels) */
 	#define CHIP_HEIGHT 16          /* chip height (pixels) */
 	#define COLORS 1                /* number of colors (1 or 2) */

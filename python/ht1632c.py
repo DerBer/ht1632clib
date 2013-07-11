@@ -5,7 +5,7 @@ from ctypes import *
 libPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + "/../libht1632c.so")
 lib = cdll.LoadLibrary(libPath)
 
-lib.ht1632c_init.argtypes = []
+lib.ht1632c_init.argtypes = [c_int]
 lib.ht1632c_init.restype = c_int
 lib.ht1632c_pwm.argtypes = [c_byte]
 lib.ht1632c_pwm.restype = None
@@ -21,11 +21,11 @@ lib.ht1632c_putstr.argtypes = [c_int, c_int, c_char_p, c_void_p, c_byte]
 lib.ht1632c_putstr.restype = c_int
 
 class HT1632C(object):
-	def __init__(self):
+	def __init__(self, rotation):
 		print("Loading GPIO SPI module")
 		os.system("gpio load spi")
 		print("Initializing HT1632C")
-		if lib.ht1632c_init() != 0:
+		if lib.ht1632c_init(rotation) != 0:
 			raise IOError("Could not init display")
 		self.font4x6 = lib.font_4x6
 		self.font6x8 = lib.font_6x8

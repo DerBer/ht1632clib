@@ -56,9 +56,10 @@
 #define toBit(v) ((v) ? 1 : 0)
 
 /// frame buffer
-uint8_t framebuffer[NUM_CHIPS][CHIP_SIZE];
-int spifd = -1;
-int clipX0, clipY0, clipX1, clipY1;
+uint8_t ht1632c_framebuffer[NUM_CHIPS][CHIP_SIZE];
+int ht1632c_spifd = -1;
+int ht1632c_clipX0, ht1632c_clipY0, ht1632c_clipX1, ht1632c_clipY1;
+int ht1632c_rot = 0;
 
 //
 // internal functions
@@ -82,9 +83,11 @@ void ht1632c_clk_pulse(int num)
 	while(num--)
 	{
 		digitalWrite(HT1632_CLK, 1);
-		usleep(10);
+// 		usleep(10);
+		delayMicroseconds(10);
 		digitalWrite(HT1632_CLK, 0);
-		usleep(10);
+// 		usleep(10);
+		delayMicroseconds(10);
 	}
 }
 #endif
@@ -119,14 +122,14 @@ void ht1632c_sendcmd(const int chip, const uint8_t cmd) {
 	reverse_endian(&data, sizeof(data));
 
 	ht1632c_chipselect(chip);
-	write(spifd, &data, 2);
+	write(ht1632c_spifd, &data, 2);
 
 	ht1632c_chipselect(HT1632_CS_NONE);
 }
 
 void ht1632c_update_framebuffer(const int panel, const int addr, const uint8_t target_bitval, const uint8_t pixel_bitval) 
 {
-	uint8_t* const v = framebuffer[panel] + addr;
+	uint8_t* const v = ht1632c_framebuffer[panel] + addr;
 	if (target_bitval)
 		*v |= pixel_bitval;
 	else
@@ -135,7 +138,7 @@ void ht1632c_update_framebuffer(const int panel, const int addr, const uint8_t t
 
 uint8_t ht1632c_get_framebuffer(const int panel, const int addr, const uint8_t target_bitval) 
 {
-	uint8_t* const v = framebuffer[panel] + addr;
+	uint8_t* const v = ht1632c_framebuffer[panel] + addr;
 	return *v & target_bitval;
 }
 
@@ -143,17 +146,19 @@ uint8_t ht1632c_get_framebuffer(const int panel, const int addr, const uint8_t t
 // public functions
 //
 
-int ht1632c_init()
+int ht1632c_init(const int rot)
 {
 	// init WiringPi, SPI
 	if (wiringPiSetup() == -1) {
 		printf( "WiringPi Setup Failed: %s\n", strerror(errno));
 		return 1;
 	}
-	if ((spifd = wiringPiSPISetup(0, SPI_FREQ)) < 0) {
+	if ((ht1632c_spifd = wiringPiSPISetup(0, SPI_FREQ)) < 0) {
 		printf( "SPI Setup Failed: %s\n", strerror(errno));
 		return 1;
 	}
+	
+	ht1632c_rot = rot & 3;
 	
 	// configure CS pins
 #ifdef HT1632C_CS_CHAINED
@@ -182,7 +187,17 @@ int ht1632c_init()
 
 int ht1632c_close()
 {
-	close(spifd);
+	close(ht1632c_spifd);
+}
+
+int ht1632c_width()
+{
+	return (ht1632c_rot & 1) ? HEIGHT : WIDTH;
+}
+
+int ht1632c_height()
+{
+	return (ht1632c_rot & 1) ? WIDTH : HEIGHT;
 }
 
 void ht1632c_pwm(const uint8_t value)
@@ -194,7 +209,7 @@ void ht1632c_sendframe()
 {
 	for (int chip = 0; chip < NUM_CHIPS; ++chip) {
 		ht1632c_chipselect(chip + 1);
-		write(spifd, framebuffer[chip], CHIP_SIZE);
+		write(ht1632c_spifd, ht1632c_framebuffer[chip], CHIP_SIZE);
 		ht1632c_chipselect(HT1632_CS_NONE);
 	}
 }
@@ -202,10 +217,10 @@ void ht1632c_sendframe()
 void ht1632c_clear()
 {
 	// clear buffer
-	memset(framebuffer, 0, NUM_CHIPS * CHIP_SIZE);
+	memset(ht1632c_framebuffer, 0, NUM_CHIPS * CHIP_SIZE);
 	// init headers
 	for (int i = 0; i < NUM_CHIPS; ++i) {
-		framebuffer[i][0] = HT1632_ID_WR << (8 - HT1632_ID_LEN);
+		ht1632c_framebuffer[i][0] = HT1632_ID_WR << (8 - HT1632_ID_LEN);
 	}
 	// reset clipping
 	ht1632c_clip_reset();
@@ -213,24 +228,32 @@ void ht1632c_clear()
 
 void ht1632c_clip(const int x0, const int y0, const int x1, const int y1)
 {
-	clipX0 = (x0 >= 0) ? x0 : 0;
-	clipY0 = (y0 >= 0) ? y0 : 0;
-	clipX1 = (x1 >= 0) ? x1 : WIDTH;
-	clipY1 = (y1 >= 0) ? y1 : HEIGHT;
+	ht1632c_clipX0 = (x0 >= 0) ? x0 : 0;
+	ht1632c_clipY0 = (y0 >= 0) ? y0 : 0;
+	ht1632c_clipX1 = (x1 >= 0) ? x1 : ht1632c_width();
+	ht1632c_clipY1 = (y1 >= 0) ? y1 : ht1632c_height();
 }
 
-#ifndef VERTICAL
-void ht1632c_plot(const int x, const int y, const uint8_t color)
+// #ifndef VERTICAL
+void ht1632c_plot(const int rx, const int ry, const uint8_t color)
 {
-	if (x < clipX0 || x >= clipX1 || y < clipY0 || y >= clipY1)
+	// clipping
+	if (rx < ht1632c_clipX0 || rx >= ht1632c_clipX1 || ry < ht1632c_clipY0 || ry >= ht1632c_clipY1)
 		return;
-#else
-void ht1632c_plot(const int yr, const int x, const uint8_t color)
-{
-	const int y = (WIDTH - 1) - yr;
-	if (x < clipY0 || x >= clipY1 || y < clipX0 || y >= clipX1)
-		return;
-#endif
+	
+	// rotation
+	int x = (ht1632c_rot & 1) ? ry : rx;
+	if ((ht1632c_rot & 1) != (ht1632c_rot >> 1)) x = (WIDTH - 1) - x;
+	int y = (ht1632c_rot & 1) ? rx : ry;
+	if (ht1632c_rot & 2) y = (HEIGHT - 1) - y;
+	
+// #else
+// void ht1632c_plot(const int yr, const int x, const uint8_t color)
+// {
+// 	const int y = (WIDTH - 1) - yr;
+// 	if (x < ht1632c_clipY0 || x >= ht1632c_clipY1 || y < ht1632c_clipX0 || y >= ht1632c_clipX1)
+// 		return;
+// #endif
 	const int xc = x / CHIP_WIDTH;
 	const int yc = y / CHIP_HEIGHT;
 	const int chip = xc + (xc & 0xfffe) + (yc * 2);
@@ -253,18 +276,26 @@ void ht1632c_plot(const int yr, const int x, const uint8_t color)
 	}
 }
 
-#ifndef VERTICAL
-uint8_t ht1632c_peek(const int x, const int y)
+// #ifndef VERTICAL
+uint8_t ht1632c_peek(const int rx, const int ry)
 {
-	if (x < clipX0 || x >= clipX1 || y < clipY0 || y >= clipY1)
+	// clipping
+	if (rx < ht1632c_clipX0 || rx >= ht1632c_clipX1 || ry < ht1632c_clipY0 || ry >= ht1632c_clipY1)
 		return 0;
-#else
-uint8_t ht1632c_peek(const int yr, const int x)
-{
-	const int y = (WIDTH - 1) - yr;
-	if (x < clipY0 || x >= clipY1 || y < clipX0 || y >= clipX1)
-		return 0;
-#endif
+	
+	// rotation
+	int x = (ht1632c_rot & 1) ? ry : rx;
+	if ((ht1632c_rot & 1) != (ht1632c_rot >> 1)) x = (WIDTH - 1) - x;
+	int y = (ht1632c_rot & 1) ? rx : ry;
+	if (ht1632c_rot & 2) y = (HEIGHT - 1) - y;
+	
+// #else
+// uint8_t ht1632c_peek(const int yr, const int x)
+// {
+// 	const int y = (WIDTH - 1) - yr;
+// 	if (x < ht1632c_clipY0 || x >= ht1632c_clipY1 || y < ht1632c_clipX0 || y >= ht1632c_clipX1)
+// 		return 0;
+// #endif
 	const int xc = x / CHIP_WIDTH;
 	const int yc = y / CHIP_HEIGHT;
 	const int chip = xc + (xc & 0xfffe) + (yc * 2);
@@ -363,7 +394,7 @@ void ht1632c_game(int x0, int y0, int x1, int y1, const uint8_t color)
 		if (y1 < y0) { tmp = y0; y0 = y1; y1 = tmp; };
 	}
 	
-	// TODO use 2nd buffer for new frame
+	// FIXME use 2nd buffer for new frame
 	for (int y = y0; y <= y1; ++y) {
 		for (int x = x0; x <= x1; ++x) {
 			int n = toBit(ht1632c_peek(x - 1, y - 1) & color)

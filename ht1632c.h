@@ -19,10 +19,17 @@
 //
 
 /// Initializes library and display.
-int ht1632c_init();
+/// rot: rotation of display content in multiples of 90° clockwise
+int ht1632c_init(const int rot);
 
 /// Shuts down library.
 int ht1632c_close();
+
+/// Returns logical display width in pixels.
+int ht1632c_width();
+
+/// Returns logical display height in pixels.
+int ht1632c_height();
 
 /// Sets display brightness.
 void ht1632c_pwm(const uint8_t value);
