@@ -247,13 +247,6 @@ void ht1632c_plot(const int rx, const int ry, const uint8_t color)
 	int y = (ht1632c_rot & 1) ? rx : ry;
 	if (ht1632c_rot & 2) y = (HEIGHT - 1) - y;
 	
-// #else
-// void ht1632c_plot(const int yr, const int x, const uint8_t color)
-// {
-// 	const int y = (WIDTH - 1) - yr;
-// 	if (x < ht1632c_clipY0 || x >= ht1632c_clipY1 || y < ht1632c_clipX0 || y >= ht1632c_clipX1)
-// 		return;
-// #endif
 	const int xc = x / CHIP_WIDTH;
 	const int yc = y / CHIP_HEIGHT;
 	const int chip = xc + (xc & 0xfffe) + (yc * 2);
@@ -289,13 +282,6 @@ uint8_t ht1632c_peek(const int rx, const int ry)
 	int y = (ht1632c_rot & 1) ? rx : ry;
 	if (ht1632c_rot & 2) y = (HEIGHT - 1) - y;
 	
-// #else
-// uint8_t ht1632c_peek(const int yr, const int x)
-// {
-// 	const int y = (WIDTH - 1) - yr;
-// 	if (x < ht1632c_clipY0 || x >= ht1632c_clipY1 || y < ht1632c_clipX0 || y >= ht1632c_clipX1)
-// 		return 0;
-// #endif
 	const int xc = x / CHIP_WIDTH;
 	const int yc = y / CHIP_HEIGHT;
 	const int chip = xc + (xc & 0xfffe) + (yc * 2);
