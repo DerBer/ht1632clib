@@ -16,9 +16,9 @@ lib.ht1632c_line.argtypes = [c_int, c_int, c_int, c_int, c_byte]
 lib.ht1632c_line.restype = None
 lib.ht1632c_box.argtypes = [c_int, c_int, c_int, c_int, c_byte]
 lib.ht1632c_box.restype = None
-lib.ht1632c_putchar.argtypes = [c_int, c_int, c_char, c_void_p, c_byte]
+lib.ht1632c_putchar.argtypes = [c_int, c_int, c_char, c_void_p, c_byte, c_byte]
 lib.ht1632c_putchar.restype = c_int
-lib.ht1632c_putstr.argtypes = [c_int, c_int, c_char_p, c_void_p, c_byte]
+lib.ht1632c_putstr.argtypes = [c_int, c_int, c_char_p, c_void_p, c_byte, c_byte]
 lib.ht1632c_putstr.restype = c_int
 
 class HT1632C(object):
@@ -52,8 +52,8 @@ class HT1632C(object):
 	def box(self, x0, y0, x1, y1, color):
 		lib.ht1632c_box(x0, y0, x1, y1, color)
 	
-	def putchar(self, x, y, c, font, color):
-		return lib.ht1632c_putchar(x, y, c, font, color)
+	def putchar(self, x, y, c, font, color, bg):
+		return lib.ht1632c_putchar(x, y, c, font, color, bg)
 	
-	def putstr(self, x, y, s, font, color):
-		return lib.ht1632c_putstr(x, y, s, font, color)
+	def putstr(self, x, y, s, font, color, bg):
+		return lib.ht1632c_putstr(x, y, s, font, color, bg)

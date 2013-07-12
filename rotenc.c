@@ -5,6 +5,9 @@
 #include <errno.h>
 #include <wiringPi.h>
 
+// Number of WiringPi lock used
+#define LOCK_ID 2
+
 static int rotenc_pin_enc0 = 0;
 static int rotenc_pin_enc1 = 0;
 static int rotenc_pin_btn = 0;
@@ -13,7 +16,6 @@ static int rotenc_value = 0;
 
 void rotenc_decode(int code)
 {
-// 	printf("code: %d\n", code);
 	static int state = 0;
 	if (state == 0) {
 		if (code == 0)
@@ -22,23 +24,17 @@ void rotenc_decode(int code)
 			state = -1;
 	} else if (state > 0) {
 		if ((code == state) && (++state >= 4)) {
-// 			rotenc_callback(1);
 			rotenc_value = 1;
-			piUnlock(0);
-// 			printf("rotenc unlock\n");
+			piUnlock(LOCK_ID);
 			state = 0;
-// 			piLock(0);
 		}
 	} else { // (state < 0)
 		if (((code ^ 2) == -state) && (--state <= 4)) {
-// 			rotenc_callback(-1);
 			rotenc_value = -1;
-			piUnlock(0);
+			piUnlock(LOCK_ID);
 			state = 0;
-// 			piLock(0);
 		}
 	}
-// 	printf("state: %d\n", state);
 }
 
 void rotenc_isr_enc0()
@@ -54,17 +50,15 @@ void rotenc_isr_enc1()
 void rotenc_isr_btn()
 {
 	rotenc_value = 0;
-	piUnlock(0);
+	piUnlock(LOCK_ID);
 }
 
 PI_THREAD(cbThread)
 {
 	piHiPri(10);
 	for (;;) {
-// 		printf("rotenc thread\n");
-		piLock(0);
+		piLock(LOCK_ID);
 		rotenc_callback(rotenc_value);
-// 		piUnlock(0);
 	}
 }
 
@@ -93,7 +87,6 @@ int rotenc_init(int pinEnc0, int pinEnc1, int pinBtn, rotenc_callback_t callback
 	wiringPiISR(pinBtn, INT_EDGE_RISING, &rotenc_isr_btn);
 	
 	// start handler thread
-	piLock(0);
 	if (piThreadCreate(cbThread) != 0) {
 		printf( "Could not create rotary encoder handler thread\n");
 		return 1;

@@ -13,6 +13,7 @@
 #define GREEN        1
 #define RED          2
 #define ORANGE       3
+#define TRANSPARENT 0xff
 
 //
 // public functions
@@ -60,10 +61,10 @@ void ht1632c_line(const int x0, const int y0, const int x1, const int y1, const 
 void ht1632c_box(const int x0, const int y0, const int x1, const int y1, const uint8_t color);
 
 /// Prints a character.
-int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font, const uint8_t color);
+int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font, const uint8_t color, const uint8_t bg);
 
 /// Prints a string.
-int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color);
+int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color, const uint8_t bg);
 
 ///
 void ht1632c_game(int x0, int y0, int x1, int y1, const uint8_t color);

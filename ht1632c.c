@@ -53,6 +53,9 @@
 #define CHIP_SIZE ((COLOR_SIZE * COLORS) + 2)     /* effective size of frame buffer per chip */
 #define PANEL_HEADER_BITS (HT1632_ID_LEN + HT1632_ADDR_LEN)
 
+// Number of WiringPi lock used
+#define LOCK_ID 0
+
 #define toBit(v) ((v) ? 1 : 0)
 
 /// frame buffer
@@ -118,13 +121,15 @@ void ht1632c_sendcmd(const int chip, const uint8_t cmd) {
 	data <<= 8;
 	data |= cmd;
 	data <<= 5;
-	
 	reverse_endian(&data, sizeof(data));
-
+	
+	piLock(LOCK_ID);
+	
 	ht1632c_chipselect(chip);
 	write(ht1632c_spifd, &data, 2);
-
 	ht1632c_chipselect(HT1632_CS_NONE);
+	
+	piUnlock(LOCK_ID);
 }
 
 void ht1632c_update_framebuffer(const int panel, const int addr, const uint8_t target_bitval, const uint8_t pixel_bitval) 
@@ -207,11 +212,13 @@ void ht1632c_pwm(const uint8_t value)
 
 void ht1632c_sendframe()
 {
+	piLock(LOCK_ID);
 	for (int chip = 0; chip < NUM_CHIPS; ++chip) {
 		ht1632c_chipselect(chip + 1);
 		write(ht1632c_spifd, ht1632c_framebuffer[chip], CHIP_SIZE);
 		ht1632c_chipselect(HT1632_CS_NONE);
 	}
+	piUnlock(LOCK_ID);
 }
 
 void ht1632c_clear()
@@ -338,7 +345,7 @@ void ht1632c_box(int x0, int y0, int x1, int y1, const uint8_t color)
 	}
 }
 
-int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font, const uint8_t color)
+int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font, const uint8_t color, const uint8_t bg)
 {
 	const int width = font->width;
 	const int height = font->height;
@@ -354,7 +361,10 @@ int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font
 		uint16_t dots = addr[col];
 		for (int row = height - 1; row >= 0; --row) {
 // 			ht1632c_plot(x + col, y + row, (dots & 1) ? color : 0);
-			if (dots & 1) ht1632c_plot(x + col, y + row, color);
+			if (dots & 1)
+				ht1632c_plot(x + col, y + row, color);
+			else if (bg != TRANSPARENT)
+				ht1632c_plot(x + col, y + row, bg);
 			dots >>= 1;
 		}
 	}
@@ -362,11 +372,11 @@ int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font
 	return x + width;
 }
 
-int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color)
+int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color, const uint8_t bg)
 {
 	int p;
 	for (p = x; *s; ++s) {
-		p = ht1632c_putchar(p, y, *s, font, color);
+		p = ht1632c_putchar(p, y, *s, font, color, bg);
 	}
 	return p;
 }
