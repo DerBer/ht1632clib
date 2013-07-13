@@ -59,10 +59,10 @@
 #define toBit(v) ((v) ? 1 : 0)
 
 /// frame buffer
-uint8_t ht1632c_framebuffer[NUM_CHIPS][CHIP_SIZE];
-int ht1632c_spifd = -1;
-int ht1632c_clipX0, ht1632c_clipY0, ht1632c_clipX1, ht1632c_clipY1;
-int ht1632c_rot = 0;
+static uint8_t ht1632c_framebuffer[NUM_CHIPS][CHIP_SIZE];
+static int ht1632c_spifd = -1;
+static int ht1632c_clipX0, ht1632c_clipY0, ht1632c_clipX1, ht1632c_clipY1;
+static int ht1632c_rot = 0;
 
 //
 // internal functions

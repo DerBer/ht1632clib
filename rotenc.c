@@ -58,7 +58,7 @@ PI_THREAD(cbThread)
 	piHiPri(10);
 	for (;;) {
 		piLock(LOCK_ID);
-		rotenc_callback(rotenc_value);
+		if (rotenc_callback) rotenc_callback(rotenc_value);
 	}
 }
 
@@ -87,6 +87,7 @@ int rotenc_init(int pinEnc0, int pinEnc1, int pinBtn, rotenc_callback_t callback
 	wiringPiISR(pinBtn, INT_EDGE_RISING, &rotenc_isr_btn);
 	
 	// start handler thread
+	piLock(LOCK_ID);
 	if (piThreadCreate(cbThread) != 0) {
 		printf( "Could not create rotary encoder handler thread\n");
 		return 1;
