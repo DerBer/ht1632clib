@@ -5,6 +5,10 @@
 #include <errno.h>
 #include <wiringPi.h>
 
+#ifdef PYTHON
+#include <Python.h>
+#endif
+
 // Number of WiringPi lock used
 #define LOCK_ID 2
 
@@ -58,8 +62,23 @@ PI_THREAD(cbThread)
 	piHiPri(10);
 	for (;;) {
 		piLock(LOCK_ID);
-		if (rotenc_callback) rotenc_callback(rotenc_value);
+// 		printf("cb\n");
+		if (rotenc_callback) {
+#ifdef PYTHON
+			PyGILState_STATE gstate = PyGILState_Ensure();
+#endif
+			rotenc_callback(rotenc_value);
+#ifdef PYTHON
+			PyGILState_Release(gstate);
+#endif
+		}
 	}
+}
+
+int rotenc_wait()
+{
+	piLock(LOCK_ID);
+	return rotenc_value;
 }
 
 int rotenc_init(int pinEnc0, int pinEnc1, int pinBtn, rotenc_callback_t callback)
@@ -86,11 +105,20 @@ int rotenc_init(int pinEnc0, int pinEnc1, int pinBtn, rotenc_callback_t callback
 	wiringPiISR(pinEnc1, INT_EDGE_BOTH, &rotenc_isr_enc1);
 	wiringPiISR(pinBtn, INT_EDGE_RISING, &rotenc_isr_btn);
 	
-	// start handler thread
+	// initial wait lock
 	piLock(LOCK_ID);
-	if (piThreadCreate(cbThread) != 0) {
-		printf( "Could not create rotary encoder handler thread\n");
-		return 1;
+	
+	// start handler thread, if callback provided;
+	// otherwise, rotenc_wait() must be used
+	if (callback) {
+#ifdef PYTHON
+		printf("Init Python threads\n");
+		PyEval_InitThreads(); // initialize threading for Python
+#endif
+		if (piThreadCreate(cbThread) != 0) {
+			printf( "Could not create rotary encoder handler thread\n");
+			return 1;
+		}
 	}
 	
 	return 0;

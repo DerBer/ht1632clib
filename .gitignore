@@ -2,4 +2,5 @@
 *.pyc
 /libht1632c.a
 /libht1632c.so
+/libht1632c-py.so
 /test

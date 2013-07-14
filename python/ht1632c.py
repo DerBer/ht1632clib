@@ -3,7 +3,7 @@ import os
 import inspect
 from ctypes import *
 
-libPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + "/../libht1632c.so")
+libPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + "/../libht1632c-py.so")
 lib = cdll.LoadLibrary(libPath)
 
 lib.ht1632c_init.argtypes = [c_int]
@@ -56,4 +56,4 @@ class HT1632C(object):
 		return lib.ht1632c_putchar(x, y, c, font, color, bg)
 	
 	def putstr(self, x, y, s, font, color, bg):
-		return lib.ht1632c_putstr(x, y, s, font, color, bg)
+		return lib.ht1632c_putstr(x, y, c_char_p(s.encode("ascii")), font, color, bg)
