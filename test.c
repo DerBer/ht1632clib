@@ -48,7 +48,7 @@ int main(void)
 // 		usleep(50000);
 // 	}
 
-	ht1632c_putstr(0, 0, "0123", &font_7x8, 1, TRANSPARENT);
+	ht1632c_putstr(0, 0, "0123", &font_7x8_num, 1, TRANSPARENT);
 	ht1632c_sendframe();
 	
 	usleep(1000000);
