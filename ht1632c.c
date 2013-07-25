@@ -381,6 +381,16 @@ int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font
 	return p;
 }
 
+int ht1632c_fontwidth(const FontInfo* font)
+{
+	return font->width;
+}
+
+int ht1632c_fontheight(const FontInfo* font)
+{
+	return font->height;
+}
+
 void ht1632c_game(int x0, int y0, int x1, int y1, const uint8_t color)
 {
 	// fix corner order
