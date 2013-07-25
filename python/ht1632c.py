@@ -36,6 +36,7 @@ class HT1632C(object):
 		self.font6x8 = lib.font_6x8
 		self.font7x12 = lib.font_7x12
 		self.font8x12 = lib.font_8x12
+		self.font12x16 = lib.font_12x16
 	
 	def pwm(self, value):
 		lib.ht1632c_pwm(value)

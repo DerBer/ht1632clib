@@ -17,3 +17,4 @@ extern const FontInfo font_4x6;
 extern const FontInfo font_6x8;
 extern const FontInfo font_7x12;
 extern const FontInfo font_8x12;
+extern const FontInfo font_12x16;
