@@ -10,6 +10,8 @@ class HT1632C(object):
 		
 		self.lib.ht1632c_init.argtypes = [c_int]
 		self.lib.ht1632c_init.restype = c_int
+		self.lib.ht1632c_close.argtypes = []
+		self.lib.ht1632c_close.restype = None
 		self.lib.ht1632c_pwm.argtypes = [c_byte]
 		self.lib.ht1632c_pwm.restype = None
 		self.lib.ht1632c_clip.argtypes = [c_int, c_int, c_int, c_int]
@@ -29,8 +31,6 @@ class HT1632C(object):
 		self.lib.ht1632c_fontheight.argtypes = [c_void_p]
 		self.lib.ht1632c_fontheight.restype = c_int
 		
-		print("Loading GPIO SPI module")
-		os.system("gpio load spi")
 		print("Initializing HT1632C")
 		if self.lib.ht1632c_init(rotation) != 0:
 			raise IOError("Could not init display")
@@ -41,6 +41,9 @@ class HT1632C(object):
 		self.font7x12 = self.lib.font_7x12
 		self.font8x12 = self.lib.font_8x12
 		self.font12x16 = self.lib.font_12x16
+	
+	def close(self):
+		self.lib.ht1632c_close()
 	
 	def pwm(self, value):
 		self.lib.ht1632c_pwm(value)
