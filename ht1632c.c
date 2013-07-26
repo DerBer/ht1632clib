@@ -265,9 +265,8 @@ void ht1632c_plot(const int rx, const int ry, const uint8_t color)
 // 	printf("chip: %d, addr: %d, bit: %d\n", chip, addr, bitval);
 
 	// first color
-	if (addr > 1 || bitval <= 2)
-		ht1632c_update_framebuffer(chip, addr, (color & 1), bitval);
-	else // special case: first bits must are 'wrapped' to the end
+	ht1632c_update_framebuffer(chip, addr, (color & 1), bitval);
+	if (addr <= 1 && bitval > 2) // special case: first bits must are 'wrapped' to the end
 		ht1632c_update_framebuffer(chip, addr + CHIP_SIZE - 2, (color & 1), bitval);
 	// other colors
 	for (int i = 1; i < COLORS; ++i) {
@@ -301,10 +300,7 @@ uint8_t ht1632c_peek(const int rx, const int ry)
 
 	uint8_t c;
 	// first color
-	if (addr > 1 || bitval <= 2)
-		c = ht1632c_get_framebuffer(chip, addr, bitval) ? 1 : 0;
-	else // special case: first bits must are 'wrapped' to the end
-		c = ht1632c_get_framebuffer(chip, addr + CHIP_SIZE - 2, bitval) ? 1 : 0;
+	c = ht1632c_get_framebuffer(chip, addr, bitval) ? 1 : 0;
 	// other colors
 	for (int i = 1; i < COLORS; ++i) {
 		addr += COLOR_SIZE;
