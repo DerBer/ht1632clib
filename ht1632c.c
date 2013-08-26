@@ -368,11 +368,84 @@ int ht1632c_putchar(const int x, const int y, const char c, const FontInfo* font
 	return x + width;
 }
 
+int ht1632c_putchar_metric(const int x, const int y, const char c, const FontInfo* font, const uint8_t color, const uint8_t bg)
+{
+	const int width = font->width;
+	const int height = font->height;
+	const int map_start = font->map_start;
+	const int map_end = font->map_end;
+
+	if (c < map_start) return 0;
+	if (c > map_end) return 0;
+	
+	uint16_t const* addr = font->data + (c - map_start) * width;
+	uint8_t const* metric_addr = font->metric + 2*(c - map_start);
+	const int left = metric_addr[0];
+	const int right = metric_addr[1];
+// 	printf("puchar font: %x, w: %d, h: %d, start: %d, end: %d, addr: %x\n", font, width, height, map_start, map_end, addr);
+	for (int col = left; col < width - right; ++col) {
+		uint16_t dots = addr[col];
+		for (int row = height - 1; row >= 0; --row) {
+// 			ht1632c_plot(x + col, y + row, (dots & 1) ? color : 0);
+			if (dots & 1)
+				ht1632c_plot(x + col - left, y + row, color);
+			else if (bg != TRANSPARENT)
+				ht1632c_plot(x + col - left, y + row, bg);
+			dots >>= 1;
+		}
+	}
+	int col = width - right;
+	uint16_t dots = addr[col];
+	for (int row = height - 1; row >= 0; --row) {
+		if (dots & 1)
+			ht1632c_plot(x + col - left, y + row, color);
+		else if (bg != TRANSPARENT)
+			ht1632c_plot(x + col - left, y + row, bg);
+		dots >>= 1;
+	}
+	
+	return x + width - left - right + 1;
+}
+
 int ht1632c_putstr(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color, const uint8_t bg)
 {
 	int p;
 	for (p = x; *s; ++s) {
 		p = ht1632c_putchar(p, y, *s, font, color, bg);
+	}
+	return p;
+}
+
+int ht1632c_putstr_metric(const int x, const int y, const char* s, const FontInfo* font, const uint8_t color, const uint8_t bg)
+{
+	int p;
+	for (p = x; *s; ++s) {
+		p = ht1632c_putchar_metric(p, y, *s, font, color, bg);
+	}
+	return p;
+}
+
+int ht1632c_charwidth(const char c, const FontInfo* font)
+{
+	const int width = font->width;
+	const int height = font->height;
+	const int map_start = font->map_start;
+	const int map_end = font->map_end;
+
+	if (c < map_start) return 0;
+	if (c > map_end) return 0;
+	
+	uint8_t const* metric_addr = font->metric + 2*(c - map_start);
+	const int left = metric_addr[0];
+	const int right = metric_addr[1];
+	return width - left - right + 1;
+}
+
+int ht1632c_strwidth(const char* s, const FontInfo* font)
+{
+	int p;
+	for (p = 0; *s; ++s) {
+		p = p + ht1632c_charwidth(*s,font);
 	}
 	return p;
 }

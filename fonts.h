@@ -7,6 +7,7 @@ typedef struct
 	const uint8_t map_start;
 	const uint8_t map_end;
 	const uint16_t* data;
+	const uint8_t* metric;
 } FontInfo;
 
 // numeric-only fonts
