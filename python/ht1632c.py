@@ -49,6 +49,7 @@ class HT1632C(object):
 		self.font7x12 = self.lib.font_7x12
 		self.font8x12 = self.lib.font_8x12
 		self.font12x16 = self.lib.font_12x16
+		self.font4x6sym = self.lib.font_4x6_sym
 	
 	def close(self):
 		self.lib.ht1632c_close()
