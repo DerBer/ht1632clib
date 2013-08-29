@@ -42,6 +42,7 @@ class HT1632C(object):
 		print("Initializing HT1632C")
 		if self.lib.ht1632c_init(rotation) != 0:
 			raise IOError("Could not init display")
+		self.font3x4num = self.lib.font_3x4_num
 		self.font4x5num = self.lib.font_4x5_num
 		self.font7x8num = self.lib.font_7x8_num
 		self.font4x6 = self.lib.font_4x6

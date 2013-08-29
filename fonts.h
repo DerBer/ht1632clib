@@ -11,6 +11,7 @@ typedef struct
 } FontInfo;
 
 // numeric-only fonts
+extern const FontInfo font_3x4_num;
 extern const FontInfo font_4x5_num;
 extern const FontInfo font_7x8_num;
 

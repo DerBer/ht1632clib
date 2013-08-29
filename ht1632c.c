@@ -394,7 +394,8 @@ int ht1632c_putchar_metric(const int x, const int y, const char c, const FontInf
 			dots >>= 1;
 		}
 	}
-	int col = width - right;
+
+/*	int col = width - right;
 	uint16_t dots = addr[col];
 	for (int row = height - 1; row >= 0; --row) {
 		if (dots & 1)
@@ -402,7 +403,11 @@ int ht1632c_putchar_metric(const int x, const int y, const char c, const FontInf
 		else if (bg != TRANSPARENT)
 			ht1632c_plot(x + col - left, y + row, bg);
 		dots >>= 1;
-	}
+	}*/
+	int col = width - right;
+	if (bg != TRANSPARENT)
+		for (int row = height - 1; row >= 0; --row)
+			ht1632c_plot(x + col - left, y + row, bg);
 	
 	return x + width - left - right + 1;
 }
