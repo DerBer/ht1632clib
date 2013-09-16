@@ -44,9 +44,6 @@
 #define HT1632_CS_NONE 0x00  /* None of ht1632c selected */
 #define HT1632_CS_ALL  0xff  /* All of ht1632c selected */
 
-#define SPI_FREQ 2560000     /* SPI frequency (Hz) */
-// 32000000
-
 // panel parameters
 #define NUM_CHIPS (CHIPS_PER_PANEL * NUM_PANELS)  /* total number of chips */
 #define COLOR_SIZE (CHIP_WIDTH * CHIP_HEIGHT / 8) /* size of single color data */
@@ -86,11 +83,9 @@ void ht1632c_clk_pulse(int num)
 	while(num--)
 	{
 		digitalWrite(HT1632_CLK, 1);
-// 		usleep(10);
-		delayMicroseconds(10);
+		delayMicroseconds(CS_CLK_DELAY);
 		digitalWrite(HT1632_CLK, 0);
-// 		usleep(10);
-		delayMicroseconds(10);
+		delayMicroseconds(CS_CLK_DELAY);
 	}
 }
 #endif

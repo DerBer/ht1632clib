@@ -41,3 +41,7 @@
 	#define CHIP_HEIGHT 16          /* chip height (pixels) */
 	#define COLORS 1                /* number of colors (1 or 2) */
 #endif
+
+#define SPI_FREQ 2560000     /* SPI frequency (Hz) */
+// 32000000
+#define CS_CLK_DELAY 10
