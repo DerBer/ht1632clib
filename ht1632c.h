@@ -21,7 +21,7 @@
 
 /// Initializes library and display.
 /// rot: rotation of display content in multiples of 90° clockwise
-int ht1632c_init(const int rot);
+int ht1632c_init(const int num_panels, const int rot);
 
 /// Shuts down library.
 int ht1632c_close();

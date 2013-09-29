@@ -4,11 +4,11 @@ import inspect
 from ctypes import *
 
 class HT1632C(object):
-	def __init__(self, rotation):
+	def __init__(self, num_panels, rotation):
 		libPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + "/../libht1632c-py.so")
 		self.lib = cdll.LoadLibrary(libPath)
 		
-		self.lib.ht1632c_init.argtypes = [c_int]
+		self.lib.ht1632c_init.argtypes = [c_int, c_int]
 		self.lib.ht1632c_init.restype = c_int
 		self.lib.ht1632c_close.argtypes = []
 		self.lib.ht1632c_close.restype = None
@@ -40,7 +40,7 @@ class HT1632C(object):
 		self.lib.ht1632c_fontheight.restype = c_int
 		
 		print("Initializing HT1632C")
-		if self.lib.ht1632c_init(rotation) != 0:
+		if self.lib.ht1632c_init(num_panels, rotation) != 0:
 			raise IOError("Could not init display")
 		self.font3x4num = self.lib.font_3x4_num
 		self.font4x5num = self.lib.font_4x5_num

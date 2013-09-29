@@ -8,6 +8,15 @@
 #include "ht1632c.h"
 #include "rotenc.h"
 
+#define NUM_PANELS 3
+#define PANEL_ROTATION 0
+#define WIDTH (NUM_PANELS * 32)
+#define HEIGHT 16
+
+#define ROTENC_PIN_0 3
+#define ROTENC_PIN_1 4
+#define ROTENC_PIN_BTN 2
+
 void rotenc(int value)
 {
 	printf("rotenc: %d\n", value);
@@ -15,15 +24,11 @@ void rotenc(int value)
 
 int main(void)
 {
-#define ROTENC_PIN_0 3
-#define ROTENC_PIN_1 4
-#define ROTENC_PIN_BTN 2
-	
 	printf("init rotenc\n");
 	rotenc_init(ROTENC_PIN_0, ROTENC_PIN_1, ROTENC_PIN_BTN, &rotenc);
 	
 	printf("init ht1632c\n");
-	ht1632c_init(0);
+	ht1632c_init(NUM_PANELS, PANEL_ROTATION);
 	
 // 	printf("set pwm\n");
 	ht1632c_pwm(7);
@@ -43,31 +48,30 @@ int main(void)
 // 		i = (i + 1) % 64;
 // 		ht1632c_clear();
 // // 		ht1632c_clip(1, 1, 60, 7);
-// 		ht1632c_putstr(32-i, 0, "0123456789", &font_7x8, 3);
+// 		ht1632c_putstr(32-i, 0, "0123456789", &font_7x8_num, 3, TRANSPARENT);
 // 		ht1632c_sendframe();
 // 		usleep(50000);
 // 	}
 
-	ht1632c_putstr(0, 0, "0123", &font_7x8_num, 1, TRANSPARENT);
-	ht1632c_sendframe();
-	
-	usleep(1000000);
-	while (1) {
-		ht1632c_game(0, 0, ht1632c_width() - 1, ht1632c_height() - 1, 1);
-		ht1632c_sendframe();
-		usleep(10000);
-	}
+// 	ht1632c_putstr(0, 0, "0123", &font_7x8_num, 1, TRANSPARENT);
+// 	ht1632c_sendframe();
+// 	
+// 	usleep(1000000);
+// 	while (1) {
+// 		ht1632c_game(0, 0, ht1632c_width() - 1, ht1632c_height() - 1, 1);
+// 		ht1632c_sendframe();
+// 		usleep(10000);
+// 	}
 
 // 	ht1632c_box(0, 0, 63, 15, 3);
 // 	ht1632c_sendframe();
 // 	while (1) usleep(1000000);
-// 	ht1632c_close();
 	
 // 	int i = 0;
 // 	while (1) {
 // 	// 	printf("draw\n");
-// 		for (int x = 0; x < 64; ++x) {
-// 			for (int y = 0; y < 16; ++y) {
+// 		for (int x = 0; x < WIDTH; ++x) {
+// 			for (int y = 0; y < HEIGHT; ++y) {
 // 				ht1632c_plot(x, y, (i + x + y) & ORANGE);
 // 			}
 // 		}
@@ -85,8 +89,14 @@ int main(void)
 // 		ht1632c_sendframe();
 // 		
 // 		i++;
-// 		usleep(50000);
+// 		usleep(100000);
 // 	}
 	
-// 	printf("done.\n");
+	ht1632c_line(0, 0, WIDTH - 1, HEIGHT - 1, RED);
+	ht1632c_line(0, HEIGHT - 1, WIDTH - 1, 0, RED);
+// 	ht1632c_box(0, 0, WIDTH - 1, HEIGHT - 1, ORANGE);
+	ht1632c_sendframe();
+	
+	ht1632c_close();
+	printf("done.\n");
 }

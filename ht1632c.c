@@ -45,18 +45,26 @@
 #define HT1632_CS_ALL  0xff  /* All of ht1632c selected */
 
 // panel parameters
-#define NUM_CHIPS (CHIPS_PER_PANEL * NUM_PANELS)  /* total number of chips */
+// #define NUM_CHIPS (CHIPS_PER_PANEL * NUM_PANELS)  /* total number of chips */
 #define COLOR_SIZE (CHIP_WIDTH * CHIP_HEIGHT / 8) /* size of single color data */
 #define CHIP_SIZE ((COLOR_SIZE * COLORS) + 2)     /* effective size of frame buffer per chip */
 #define PANEL_HEADER_BITS (HT1632_ID_LEN + HT1632_ADDR_LEN)
 
-// Number of WiringPi lock used
+// use this WiringPi lock ID
 #define LOCK_ID 0
 
 #define toBit(v) ((v) ? 1 : 0)
 
+// panel configuration
+static int ht1632c_num_panels = 0;
+#define NUM_CHIPS (CHIPS_PER_PANEL * ht1632c_num_panels) /* total number of chips */
+#define WIDTH (PANEL_WIDTH * ht1632c_num_panels)
+#define HEIGHT PANEL_HEIGHT
+
 /// frame buffer
-static uint8_t ht1632c_framebuffer[NUM_CHIPS][CHIP_SIZE];
+static uint8_t* ht1632c_framebuffer = 0;
+#define FB_PTR(chip, addr) (ht1632c_framebuffer + (chip * CHIP_SIZE + addr))
+
 static int ht1632c_spifd = -1;
 static int ht1632c_clipX0, ht1632c_clipY0, ht1632c_clipX1, ht1632c_clipY1;
 static int ht1632c_rot = 0;
@@ -127,18 +135,18 @@ void ht1632c_sendcmd(const int chip, const uint8_t cmd) {
 	piUnlock(LOCK_ID);
 }
 
-void ht1632c_update_framebuffer(const int panel, const int addr, const uint8_t target_bitval, const uint8_t pixel_bitval) 
+void ht1632c_update_framebuffer(const int chip, const int addr, const uint8_t target_bitval, const uint8_t pixel_bitval) 
 {
-	uint8_t* const v = ht1632c_framebuffer[panel] + addr;
+	uint8_t* const v = FB_PTR(chip, addr);
 	if (target_bitval)
 		*v |= pixel_bitval;
 	else
 		*v &= ~pixel_bitval;
 }
 
-uint8_t ht1632c_get_framebuffer(const int panel, const int addr, const uint8_t target_bitval) 
+uint8_t ht1632c_get_framebuffer(const int chip, const int addr, const uint8_t target_bitval) 
 {
-	uint8_t* const v = ht1632c_framebuffer[panel] + addr;
+	uint8_t* const v = FB_PTR(chip, addr);
 	return *v & target_bitval;
 }
 
@@ -146,7 +154,7 @@ uint8_t ht1632c_get_framebuffer(const int panel, const int addr, const uint8_t t
 // public functions
 //
 
-int ht1632c_init(const int rot)
+int ht1632c_init(const int num_panels, const int rot)
 {
 	// init WiringPi, SPI
 	if (wiringPiSetup() == -1) {
@@ -158,7 +166,18 @@ int ht1632c_init(const int rot)
 		return 1;
 	}
 	
+	// configuration
+	if (num_panels <= 0) {
+		printf( "Invalid parameters.");
+		return 2;
+	}
+	ht1632c_num_panels = num_panels;
 	ht1632c_rot = rot & 3;
+	ht1632c_framebuffer = (uint8_t*) malloc(NUM_CHIPS * CHIP_SIZE);
+	if (!ht1632c_framebuffer) {
+		printf( "Framebuffer allocation failed.");
+		return 3;
+	}
 	
 	// configure CS pins
 #ifdef HT1632C_CS_CHAINED
@@ -188,6 +207,11 @@ int ht1632c_init(const int rot)
 int ht1632c_close()
 {
 	close(ht1632c_spifd);
+	
+	if (ht1632c_framebuffer) {
+		free(ht1632c_framebuffer);
+		ht1632c_framebuffer = 0;
+	}
 }
 
 int ht1632c_width()
@@ -210,7 +234,7 @@ void ht1632c_sendframe()
 	piLock(LOCK_ID);
 	for (int chip = 0; chip < NUM_CHIPS; ++chip) {
 		ht1632c_chipselect(chip + 1);
-		write(ht1632c_spifd, ht1632c_framebuffer[chip], CHIP_SIZE);
+		write(ht1632c_spifd, FB_PTR(chip, 0), CHIP_SIZE);
 		ht1632c_chipselect(HT1632_CS_NONE);
 	}
 	piUnlock(LOCK_ID);
@@ -222,7 +246,7 @@ void ht1632c_clear()
 	memset(ht1632c_framebuffer, 0, NUM_CHIPS * CHIP_SIZE);
 	// init headers
 	for (int i = 0; i < NUM_CHIPS; ++i) {
-		ht1632c_framebuffer[i][0] = HT1632_ID_WR << (8 - HT1632_ID_LEN);
+		*FB_PTR(i, 0) = HT1632_ID_WR << (8 - HT1632_ID_LEN);
 	}
 	// reset clipping
 	ht1632c_clip_reset();
