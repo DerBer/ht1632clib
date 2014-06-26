@@ -18,7 +18,7 @@
 	#define HT1632_CLK  10          /* chip select clock pin */
 	#define HT1632_CS   11          /* chip select data pin */
 #else
-	#define HT1632_CS   0           /* first chip select pin; */
+	#define HT1632_CS   10          /* first chip select pin; */
 	                                /* successive pin numbers are used for additional chips */
 #endif
 
@@ -40,5 +40,5 @@
 	#define COLORS 1                /* number of colors (1 or 2) */
 #endif
 
-#define SPI_FREQ 2560000     /* SPI frequency (Hz; up to 32000000) */
-#define CS_CLK_DELAY 10
+#define SPI_FREQ 2560000            /* SPI frequency (Hz; up to 32000000) */
+#define CS_CLK_DELAY 10             /* CS pulse length (µs) in chained CS mode */
