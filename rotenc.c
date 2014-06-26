@@ -17,6 +17,7 @@ static int rotenc_pin_enc1 = 0;
 static int rotenc_pin_btn = 0;
 static rotenc_callback_t rotenc_callback = 0;
 static int rotenc_value = 0;
+static int rotenc_btn_value = 0;
 
 void rotenc_decode(int code)
 {
@@ -53,8 +54,15 @@ void rotenc_isr_enc1()
 
 void rotenc_isr_btn()
 {
-	rotenc_value = 0;
-	piUnlock(LOCK_ID);
+	int read = digitalRead(rotenc_pin_btn);
+	if (read != rotenc_btn_value) {
+		rotenc_btn_value = read;
+// 		rotenc_value = rotenc_btn_value ? 0 : 2;
+		if (rotenc_btn_value) {
+			rotenc_value = 0;
+			piUnlock(LOCK_ID);
+		}
+	}
 }
 
 PI_THREAD(cbThread)
@@ -103,7 +111,8 @@ int rotenc_init(int pinEnc0, int pinEnc1, int pinBtn, rotenc_callback_t callback
 	pullUpDnControl(pinBtn, PUD_UP);
 	wiringPiISR(pinEnc0, INT_EDGE_BOTH, &rotenc_isr_enc0);
 	wiringPiISR(pinEnc1, INT_EDGE_BOTH, &rotenc_isr_enc1);
-	wiringPiISR(pinBtn, INT_EDGE_RISING, &rotenc_isr_btn);
+	wiringPiISR(pinBtn, INT_EDGE_BOTH, &rotenc_isr_btn);
+	rotenc_btn_value = digitalRead(rotenc_pin_btn);
 	
 	// initial wait lock
 	piLock(LOCK_ID);
