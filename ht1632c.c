@@ -467,9 +467,9 @@ int ht1632c_charwidth(const char c, const FontInfo* font)
 
 int ht1632c_strwidth(const char* s, const FontInfo* font)
 {
-	int p;
-	for (p = 0; *s; ++s) {
-		p = p + ht1632c_charwidth(*s,font);
+	int p = 0;
+	for (; *s; ++s) {
+		p += ht1632c_charwidth(*s, font);
 	}
 	return p;
 }

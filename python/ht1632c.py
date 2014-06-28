@@ -3,6 +3,10 @@ import os
 import inspect
 from ctypes import *
 
+# utility
+def encodeStr(s):
+	return c_char_p(s.encode("cp437", "ignore"))
+
 class HT1632C(object):
 	def __init__(self, num_panels, rotation):
 		libPath = os.path.abspath(os.path.dirname(inspect.getfile(inspect.currentframe())) + "/../libht1632c-py.so")
@@ -83,16 +87,16 @@ class HT1632C(object):
 		return self.lib.ht1632c_putchar_metric(x, y, c, font, color, bg)
 	
 	def putstr(self, x, y, s, font, color, bg):
-		return self.lib.ht1632c_putstr(x, y, c_char_p(s.encode("437")), font, color, bg)
+		return self.lib.ht1632c_putstr(x, y, encodeStr(s), font, color, bg)
 
 	def putstr_metric(self, x, y, s, font, color, bg):
-		return self.lib.ht1632c_putstr_metric(x, y, c_char_p(s.encode("437")), font, color, bg)
+		return self.lib.ht1632c_putstr_metric(x, y, encodeStr(s), font, color, bg)
 
 	def charwidth(self, c, font):
 		return self.lib.ht1632c_charwidth(c, font)
 	
 	def strwidth(self, s, font):
-		return self.lib.ht1632c_strwidth(c_char_p(s.encode("437")), font)
+		return self.lib.ht1632c_strwidth(encodeStr(s), font)
 
 	def fontwidth(self, font):
 		return self.lib.ht1632c_fontwidth(font)

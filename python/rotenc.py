@@ -13,7 +13,7 @@ class RotEnc(object):
 		self.lib.rotenc_wait.argtypes = []
 		self.lib.rotenc_wait.restype = c_int
 		
-		print("Initializing rotary ecoder")
+		print("Initializing rotary encoder")
 		if callback is not None:
 			cb = CBFUNC(callback)
 		else:
