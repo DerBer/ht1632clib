@@ -1,11 +1,14 @@
 // ht1632c panel configuration
 
+// Panel's write clock (WR) pin has to be connected to SCLK (14, GPIO 11),
+// DATA has to be connected to MOSI (12, GPIO 10).
+
 #define PANEL_32x16C /* preset for bi-color 32x16 panel */
 // #define PANEL_24x16  /* preset for monochrome 24x16 panel */
 
 // Chained chip select mode.
-// Define if chip select pins are connected directly to output pins.
-// Don't define if chips are chained and connected using CLK/CS lines.
+// Define if chips are chained and connected using CLK/CS lines.
+// Don't define if chip select pins are connected directly to output pins.
 #ifdef PANEL_32x16C
 	#define HT1632C_CS_CHAINED
 #endif
