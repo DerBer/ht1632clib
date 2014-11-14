@@ -3,6 +3,8 @@ README
 
 Examples for the SURE electronics 32x16 bicolor LED dot matrix display.
 
+The very same set of examples is once written in C and once in Python.
+
 
 Connection
 ----------
@@ -19,8 +21,8 @@ GPIO 8  (CE0)  24     CLK  2
 GPIO 7  (CE1)  26     CS   1
 
 
-Build and run
--------------
+Build and run C examples
+------------------------ 
 
 On your Raspberry PI open a shell, or connect to it by ssh, then inside
 this directory execute:
@@ -40,3 +42,20 @@ The examples them selfes need to be run with sudo, because you are about
 to write to GPIO, hence for example:
 
 sudo ./example1
+
+
+Python examples
+---------------
+
+For instance you need to copy and run the examples from within the project
+it's python directory, right there where the modules are placed.
+
+First you need to enable the wiringPi spi module like:
+
+gpio load spi
+
+
+The examples them selfes need to be run with sudo, because you are about
+to write to GPIO, hence for example:
+
+sudo ./example1.py
