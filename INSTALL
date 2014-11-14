@@ -64,11 +64,37 @@ talk to the LED matrix, you need to load the wiringPi spi extension like:
 gpio load spi
 
 
+Resulting files
+---------------
+
+To write a C/C++ programm, all you need from now on is to include these
+header files:
+
+fonts.h
+ht1632c.h
+rotenc.h
+
+And to link, either statically or dynamically, against one of these
+libraries:
+
+libht1632c.a
+libht1632c.so
+
+
+For python, you have to import the modules stored inside the python
+sub directory:
+
+ht1632c.py
+rotenc.py
+
+and have the following library at your hands too:
+
+libht1632c-py.so
+
+
 Examples
 --------
 
 Have a look at the examples directory where you will find some working
 example code and instructions how to connect your Raspberry PI with the
 LED matrix.
-
-

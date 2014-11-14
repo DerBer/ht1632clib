@@ -16,5 +16,5 @@ Read INSTALL
 
 ## Examples
 
-Have a look at the examples directory, includes description about
-how to connect your Raspberry PI and LED dot matrix display.
+Have a look at the examples directory, includes descriptions about
+how to connect your Raspberry PI and LED dot matrix displays.
