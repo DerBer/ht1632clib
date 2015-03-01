@@ -50,6 +50,7 @@ class HT1632C(object):
 		self.font4x5num = self.lib.font_4x5_num
 		self.font7x8num = self.lib.font_7x8_num
 		self.font4x6 = self.lib.font_4x6
+		self.font5x8 = self.lib.font_5x8
 		self.font6x8 = self.lib.font_6x8
 		self.font7x12 = self.lib.font_7x12
 		self.font8x12 = self.lib.font_8x12
